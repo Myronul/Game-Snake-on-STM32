@@ -1,0 +1,8 @@
+../Core/Src/SpaceInv.c:29:6:initializare_ecran	8	static
+../Core/Src/SpaceInv.c:34:6:initializare_racheta_jucator	16	static
+../Core/Src/SpaceInv.c:66:6:refresh_jucator	24	static
+../Core/Src/SpaceInv.c:80:6:pixel_adversar	24	static
+../Core/Src/SpaceInv.c:107:6:initializare_adversar_nivel1	16	static
+../Core/Src/SpaceInv.c:132:6:initializare_nivel_1	8	static
+../Core/Src/SpaceInv.c:142:6:fizica_jucator	8	static
+../Core/Src/SpaceInv.c:168:6:motor_joc	8	static
