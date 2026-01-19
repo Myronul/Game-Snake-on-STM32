@@ -1,266 +1,236 @@
-Snake Game Implementation – Technical Documentation
+# 🐍 Snake Game on STM32
+Embedded Systems Project – STM32 + ST7735 LCD
 
-Embedded Systems Project (STM32, SPI, Graphics LCD)
+---
 
-1. Source Code and Implementation Overview
+## General Description
 
-The entire source code of the project is implemented in main.c. This represents an original software and hardware implementation, developed on a custom PCB, as part of the university project P2 (Project 2).
+This project represents a complete implementation of the classic **Snake game** on an STM32 microcontroller using a **128x128 ST7735 TFT LCD** display.  
+The entire game logic, rendering, input handling, timing, and hardware interaction are implemented manually in C, without using any game engine or operating system.
 
-The application is written in C, using STM32 HAL libraries, and targets the STM32F103CBT6 microcontroller. The project integrates low-level hardware control, real-time graphics rendering, interrupt-based input handling, and deterministic game logic.
+The purpose of this project was to deeply understand:
+- how a microcontroller interacts with external hardware,
+- how to structure a medium-size embedded application,
+- how to manage real-time constraints,
+- how to design game logic using only low-level tools.
 
-2. Software Development Stages
+All functionality is implemented inside `main.c`, together with external drivers for the LCD and graphics primitives.
 
-The development process was structured into the following major stages:
+---
 
-STM32 microcontroller firmware and clock configuration
+## Hardware Architecture
 
-Peripheral configuration (SPI, GPIO, Timers, UART, External Interrupts)
+The hardware setup consists of:
+- STM32 microcontroller
+- ST7735 SPI TFT display (128x128)
+- 4 directional push buttons
+- UART interface for debugging
+- Timer used as a time base
+- SPI interface used for display communication
 
-Integration of LCD graphics libraries
+The LCD is driven via SPI in **master half-duplex mode**, since the display only receives data and never sends anything back.
 
-Mathematical modeling of the Snake game grid
+![Hardware setup](https://github.com/user-attachments/assets/80f3c1ab-0ee9-4121-a79b-d18fb734b717)
 
-Data structures and movement logic
+---
 
-Collision detection and scoring logic
+## Software Architecture Overview
 
-Optimization and refactoring using interrupts
+The software is organized around the following main components:
+- low-level peripheral initialization (GPIO, SPI, TIM, UART),
+- graphical rendering functions,
+- snake data structure and movement logic,
+- collision detection,
+- food spawning logic,
+- interrupt-based input handling,
+- timer-based pacing of the game.
 
-Hardware assembly and PCB validation
+The main loop does **not** poll buttons continuously. Instead, all user input is handled using **external interrupts**, making the game more responsive and efficient.
 
-3. STM32 Microcontroller Software / Firmware Configuration
+---
 
-I configured the STM32F103CBT6 microcontroller to operate at 72 MHz, using an external quartz oscillator, ensuring stable timing and fast instruction execution.
+## Screen Coordinate System and Grid Logic
 
-Key Configuration Choices
+The LCD has a resolution of **128x128 pixels**.  
+To simplify game logic, the entire screen is divided into a **16x16 logical grid**, where each grid cell is **8x8 pixels**.
 
-SPI (Half-Duplex, Master mode) for LCD communication
+This means:
+- all snake segments are aligned to multiples of 8,
+- food always spawns on valid grid positions,
+- collision detection becomes trivial (coordinate equality).
 
-External interrupts (EXTI) for directional buttons
+Valid coordinate values are:
+0, 8, 16, 24, ..., 120
 
-TIM2 configured to generate 100 interrupts per second
+yaml
+Copy code
 
-UART used for debugging and coordinate logging
+This design choice drastically simplifies movement, drawing, and collision checks.
 
-Timer configuration allows me to track time intervals precisely, which is essential for:
+---
 
-debouncing inputs
+## Snake Data Structure
 
-controlling snake movement speed
+The snake is implemented as an array of structures:
 
-synchronizing game logic
-
-4. Libraries Used
-
-I integrated the following libraries into the project:
-
-ST7735 display driver
-
-Adafruit_GFX graphics core
-
-Custom fonts library
-
-These libraries provide essential graphical primitives such as:
-
-pixel drawing
-
-screen filling
-
-text rendering
-
-coordinate-based drawing
-
-The LCD configuration (resolution, orientation, control pins) is defined in ST7735.h.
-
-5. Snake Game Design – Mathematical and Spatial Model
-
-The LCD screen resolution is 128×128 pixels, with the origin (0,0) located in the top-left corner.
-
-To simplify rendering and collision detection, I discretized the screen into a 16×16 grid, where:
-
-each logical cell = 8×8 pixels
-
-valid coordinates ∈ {0, 8, 16, …, 120}
-
-This abstraction allows efficient movement, rendering, and collision checks.
-
-6. Core Data Structures
-Snake Representation
-
-The snake is modeled as a vector of structures, each structure representing a body segment:
-
-typedef struct
-{
+```c
+typedef struct {
     int16_t x;
     int16_t y;
 } Sarpe;
 
 Sarpe sarpe[255];
+Each element of the array represents one segment of the snake.
+The snake length is controlled using the variable scor.
 
-Design Rationale:
+c
+Copy code
+uint8_t scor = 2; // initial length = 3 segments (0,1,2)
+The choice of int16_t instead of uint8_t was deliberate, to avoid underflow issues when subtracting values during movement.
 
-int16_t prevents underflow/overflow issues encountered with uint8_t
+Rendering the Snake
+Each snake segment is rendered as an 8x8 pixel square.
+Rendering is done pixel-by-pixel using nested loops.
 
-array size allows dynamic snake growth
-
-sarpe[0] always represents the head
-
-The snake length is controlled by the variable:
-
-uint8_t scor = 2; // snake starts with 3 segments: 0, 1, 2
-
-7. Rendering Logic (Pixel Generator Concept)
-
-Each snake segment and food item is rendered as an 8×8 pixel square, using a pivot coordinate (x, y):
-
-void pixel_sarpe(int16_t x, int16_t y)
-{
-    for(uint8_t i = x; i < x + 8; i++)
-        for(uint8_t j = y; j < y + 8; j++)
+c
+Copy code
+void pixel_sarpe(int16_t x, int16_t y) {
+    for(uint8_t i = x; i < x + 8; i++) {
+        for(uint8_t j = y; j < y + 8; j++) {
             ST7735_DrawPixel(i, j, ST7735_GREEN);
-}
-
-
-Food is rendered similarly but using a different color:
-
-void pixel_hrana(int16_t x, int16_t y)
-{
-    for(uint8_t i = x; i < x + 8; i++)
-        for(uint8_t j = y; j < y + 8; j++)
-            ST7735_DrawPixel(i, j, ST7735_RED);
-}
-
-8. Snake Movement Logic (Vector Shifting)
-
-Snake movement is implemented using a backward vector shift, followed by updating the head position.
-
-Example – movement to the right:
-
-for(uint8_t i = scor; i > 0; i--)
-{
-    sarpe[i] = sarpe[i - 1];
-}
-
-if(sarpe[0].x + 8 == 128)
-    sarpe[0].x = 0;   // wrap through wall
-else
-    sarpe[0].x += 8;
-
-
-This approach:
-
-preserves body continuity
-
-avoids dynamic memory allocation
-
-is computationally efficient
-
-9. Collision Detection
-Self-Collision
-for(uint8_t i = 1; i <= scor; i++)
-{
-    if(sarpe[0].x == sarpe[i].x &&
-       sarpe[0].y == sarpe[i].y)
-    {
-        game_over = 1;
-        interfata_game_over();
+        }
     }
 }
+Before each movement update, the snake is erased by drawing the same area using the background color (black).
+This gives the illusion of smooth movement without flickering.
 
-Wall Collision (Removed in Later Versions)
+The snake head is drawn differently, including eyes, purely for visual feedback.
 
-Initially, wall collisions ended the game. Later, I implemented screen wrapping, allowing the snake to pass through walls and reappear on the opposite side.
+Snake Movement Logic (Shift Algorithm)
+Snake movement is implemented using a backward shift algorithm.
 
-10. Food Generation (Randomized, Collision-Safe)
+The idea is simple:
 
-Food coordinates are generated using:
+each segment takes the position of the previous one,
 
+the head is moved last, based on the current direction.
+
+c
+Copy code
+for(uint8_t i = scor; i > 0; i--) {
+    sarpe[i].x = sarpe[i - 1].x;
+    sarpe[i].y = sarpe[i - 1].y;
+}
+After shifting the body, the head position is updated:
+
+right: x += 8
+
+left: x -= 8
+
+up: y -= 8
+
+down: y += 8
+
+Screen wrapping is implemented, so when the snake exits one side of the screen, it reappears on the opposite side.
+
+Food Spawning Logic
+Food is spawned at random grid-aligned coordinates:
+
+c
+Copy code
 randx = (rand() % 16) * 8;
 randy = (rand() % 16) * 8;
+Before placing the food, the algorithm checks that the position does not overlap with any snake segment.
 
+c
+Copy code
+for(uint8_t i = 0; i <= scor; i++) {
+    if(sarpe[i].x == randx && sarpe[i].y == randy) {
+        ok = 1;
+        break;
+    }
+}
+Randomness is ensured by reseeding the generator using the system tick:
 
-To ensure randomness, I use:
-
+c
+Copy code
 srand(HAL_GetTick());
+Snake Growth Logic
+When the snake eats food:
 
+the score is incremented,
 
-The algorithm verifies that food does not spawn on the snake’s body before final placement.
+a new segment is added at the tail.
 
-11. Snake Growth Logic
+The position of the new segment is calculated based on the direction of the last two segments, ensuring that the snake grows naturally and does not visually break.
 
-When the snake consumes food:
+This part is intentionally more complex, because simply duplicating coordinates would cause overlapping segments.
 
-if(sarpe[0].x == randx && sarpe[0].y == randy)
-{
-    scor++;
+Collision Detection
+Self-Collision
+At each update, the head is compared against all body segments:
+
+c
+Copy code
+for(uint8_t i = 1; i <= scor; i++) {
+    if(sarpe[0].x == sarpe[i].x && sarpe[0].y == sarpe[i].y) {
+        game_over = 1;
+    }
 }
+If a collision is detected, the game ends immediately.
 
+Input Handling Using External Interrupts
+Directional buttons are connected to GPIO pins configured as EXTI inputs.
+Each button generates an interrupt on a rising edge.
 
-The new segment is added based on the direction of the tail, determined by comparing the last two segments:
-
-if(sarpe[scor-1].x + 8 == sarpe[scor-2].x)
-{
-    sarpe[scor].x = sarpe[scor-1].x - 8;
-    sarpe[scor].y = sarpe[scor-1].y;
-}
-
-
-This guarantees correct spatial continuity.
-
-12. Input Handling via External Interrupts
-
-Buttons are configured as EXTI interrupts, eliminating polling delays:
-
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-    if(timp >= 15) // debounce
-    {
-        if(GPIO_Pin == GPIO_PIN_14)
-            apasat14 = 1; // move right
+c
+Copy code
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if(timp >= 15) {
+        // change direction safely
         timp = 0;
     }
 }
+A small timer-based delay is used to debounce the buttons and prevent unrealistic instant direction changes.
+
+Opposite directions are blocked to prevent the snake from reversing into itself.
+
+Timer Usage
+A hardware timer is configured to generate periodic interrupts.
+The timer increments a global variable used for:
+
+debouncing input,
+
+controlling game speed,
+
+ensuring consistent gameplay regardless of main loop execution time.
+
+Game Over Screen
+When the game ends, the screen is filled using a red background animation and the final score is displayed.
+
+The score shown is adjusted so that it starts from zero, excluding the initial snake length.
+
+Visual Results
 
 
-This approach significantly improves responsiveness and game feel.
-
-13. Game Over Interface
 
 
 
 
 
+Conclusion
+This project demonstrates a complete embedded application that integrates:
 
+low-level hardware configuration,
 
+SPI communication,
 
+interrupt-driven input,
 
+timer-based logic,
 
+real-time graphics rendering,
 
+and non-trivial game mechanics.
 
-The game over screen is rendered dynamically using an 8×8 pixel fill algorithm and displays the final score centrally.
-
-14. Optimizations and Enhancements
-
-External interrupts instead of polling
-
-Debouncing handled in software
-
-Snake head rendered with eyes for visual clarity
-
-Vivid color palette for improved UX
-
-Wall wrapping for increased gameplay complexity
-
-15. Conclusion
-
-This project represents a complete embedded game implementation, combining:
-
-low-level hardware control
-
-real-time graphics
-
-interrupt-driven input
-
-deterministic game physics
-
-The solution is efficient, scalable, and suitable for further extensions such as multiplayer, sound output, or AI-controlled agents.
+The Snake game is fully deterministic, efficient, and well suited for a constrained embedded environment, making it an excellent educational example of real-world embedded software development.
