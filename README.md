@@ -61,7 +61,7 @@ All wiring between the LCD module and the MCU board was soldered by hand onto a 
 
 **Final assembled board — top view:**
 
-![Assembled board](poza2.jpeg)
+![Assembled board](images/poza2.jpeg)
 
 ---
 
@@ -71,11 +71,11 @@ The MCU pinout was configured using STM32CubeMX and is reflected in the firmware
 
 **MCU — STM32F103CBTx LQFP48 pinout:**
 
-![MCU Pinout](d13.jpeg)
+![MCU Pinout](images/d13.jpeg)
 
 **LCD driver pin definitions in software (`st7735.h`):**
 
-![LCD Pin Definitions](d15.jpeg)
+![LCD Pin Definitions](images/d15.jpeg)
 
 ### Pin Mapping Summary
 
@@ -181,7 +181,7 @@ This means:
 
 The following flowchart (designed during development) describes the complete game logic for Snake, from startup to game over:
 
-![Snake Game Flowchart](d10.jpeg)
+![Snake Game Flowchart](images/d10.jpeg)
 
 The flowchart covers:
 - **Initialization**: spawn snake and food at startup
@@ -199,13 +199,13 @@ The ST7735 display uses a **128×128 pixel coordinate system** with the origin `
 
 **Coordinate system diagram:**
 
-![Coordinate System](d11.jpeg)
+![Coordinate System](images/d11.jpeg)
 
 To simplify game logic and rendering, the entire screen is divided into a **grid of 8×8 pixel cells**. Every game entity (snake body segment, food) occupies exactly one cell, and all positions are aligned to multiples of 8 pixels.
 
 **Grid structure:**
 
-![Grid Structure](d12.jpeg)
+![Grid Structure](images/d12.jpeg)
 
 This gives a logical game grid of **16×16 cells** (128 / 8 = 16 per axis), yielding 256 possible positions for any game entity.
 
@@ -459,19 +459,19 @@ Low-level 8×8 block drawing functions used by the snake and food renderers. Bot
 
 **Snake running — early game:**
 
-![Snake gameplay 1](poza4.jpeg)
+![Snake gameplay 1](images/poza4.jpeg)
 
 **Snake running — more segments collected:**
 
-![Snake gameplay 2](poza6.jpeg)
+![Snake gameplay 2](images/poza6.jpeg)
 
 **Game over screen with score:**
 
-![Game over](poza7.jpeg)
+![Game over](images/poza7.jpeg)
 
 **Speed selection screen:**
 
-![Speed selection](poza8.jpeg)
+![Speed selection](images/poza8.jpeg)
 
 ---
 
