@@ -31,10 +31,6 @@ This project was developed **from scratch** as part of the **Project 2 (P2)** co
 
 The goal was to implement a fully functional, real-time embedded game console on a bare-metal STM32 microcontroller, without relying on any operating system or high-level game engine. Everything — from display drivers and SPI communication to game physics, collision detection, and input handling — was written by hand in C.
 
-The console supports two games selectable from a startup menu:
-- **Snake** — the classic game where the player steers a growing snake around the screen, eating food and avoiding self-collision.
-- **Space Invaders** — a shoot-'em-up arcade game (implemented in a separate module, `SpaceInv.c`).
-
 The entire project runs on an **STM32F103CBTx** microcontroller (ARM Cortex-M3), driving a **1.44" ST7735 128×128 TFT LCD** over SPI, with four directional push-buttons connected as external interrupts.
 
 ---
