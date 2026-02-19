@@ -482,15 +482,16 @@ Low-level 8×8 block drawing functions used by the snake and food renderers. Bot
 ├── Core/
 │   ├── Src/
 │   │   ├── main.c          # Main application: Snake logic, interrupts, peripherals
-│   │   ├── SpaceInv.c      # Space Invaders game engine
+│   │   ├── st7735.c        # Graphics dependecies
+        |__ GFX_FUNCTIONS.c
+        |__ fonts.c
 │   │   └── ...
 │   └── Inc/
 │       ├── main.h
-│       └── SpaceInv.h
+│       └── st7735.h
+|       |__ ... 
 ├── Drivers/
-│   ├── st7735.c / st7735.h     # ST7735 LCD SPI driver
-│   ├── GFX_FUNCTIONS.c / .h    # Graphics primitives
-│   └── fonts.h                 # Bitmap fonts (Font_7x10, Font_11x18)
+│   ├── ...
 └── README.md
 ```
 
