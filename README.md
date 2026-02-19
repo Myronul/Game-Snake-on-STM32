@@ -1,6 +1,7 @@
 # Snake & Space Invaders — STM32F103 Embedded Game Console
 
-> **Project 2 (P2) — UNSTPB ETTI Politehnica București, 2024**  
+> **Project 2 (P2) — UNSTPB ETTI Politehnica București, 2024**
+> Author: Miron Andrei-Auras 
 > A fully embedded, from-scratch implementation of the classic Snake game (and Space Invaders) running on an STM32F103CBTx microcontroller with a 128×128 TFT LCD display.
 
 ---
