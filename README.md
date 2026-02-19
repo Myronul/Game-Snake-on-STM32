@@ -57,7 +57,7 @@ All wiring between the LCD module and the MCU board was soldered by hand onto a 
 
 **Perfboard wiring (back):**
 
-![Perfboard wiring](poza3.jpeg)
+![Perfboard wiring](images/poza3.jpeg)
 
 **Final assembled board — top view:**
 
