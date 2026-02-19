@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descriere Hardware</title>
+    <style>
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        section {
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        
+        .observation {
+            color: blue;
+        }
+        
+        .image {
+            text-align: center;
+            margin-top: 20px;
+        }
+       
+        .indented {
+            margin-left: 20px;
+        }
+        .image1-container {
+            display: flex;
+            justify-content: center; /* Centrează conținutul pe orizontală */
+            align-items: center; /* Centrează conținutul pe verticală */
+            margin: 20px 0; /* Adaugă spațiu deasupra și dedesubtul div-ului */
+        }
+
+        .image1 img {
+            margin-right: 10px; /* Adaugă spațiu între imagini */
+        }
+
+        .image1 img:last-child {
+            margin-right: 0; /* Elimină spațiul din dreapta ultimei imagini */
+        }
+
+    </style>
+</head>
+<body>
+    <h1>DESCRIERE HARDWARE</h1>
+
+    
+    <section id="creare_macheta">
+        <h2>CREARE MACHETĂ</h2>
+        <div class="indented">
+            <p>
+                Inițial, portul USB și microcontroller-ul au fost lipite pe placă cu ajutorul mecanismului Pick and Place, apoi introduse în cuptorul pentru lipit, după o verificare atentă la microscop (s-a verificat dacă aliajul a fost pus corect pe pad-uri, apoi dacă pinii componentelor au fost corespunzător așezați pe pad).
+            </p>
+        </div>
+       
+        <div class="image">
+            <img src="d1.jpeg" alt="Imagine d1" width="300">
+        </div>
+        <div class="indented">
+            <p>
+                Ulterior, componentele comune tuturor echipelor au fost lipite pe placă manual, folosind stația de lipit din laborator.
+            </p>
+        </div>
+        
+        <div class="image">
+            <img src="d2.jpeg" alt="Imagine d2" width="300">
+        </div>
+
+        <div class="indented">
+            <p>
+                Am început pregătirea machetei finale prin lipirea ecranului pe placă, conexiunile către pinii necesari realizându-se pe spatele plăcii cu ajutorul firelor. Ulterior, am lipit și cele 4 butoane (așezarea lor fiind intuitivă direcțiilor pentru joc); conexiunea unui buton s-a creat pe diagonală între doi pini ai acestuia.
+            </p>
+        </div>
+       
+        <div class="image1-container">
+            <div class="image1">
+                <img src="poza1.jpg" alt="Imagine d3" width="300">
+                <img src="poza2.jpeg" alt="Imagine d4" width="300">
+            </div>
+        </div>
+        <div class="indented">
+            <p>
+                Pentru a putea realiza conexiunile între terminalele perifericelor și pinii microcontroller-ului, am lipit fiecare terminal la un fir tată-tată, urmând ca mai apoi să facem la fel și pentru pinii microcontroller-ului.
+            </p>
+        </div>
+        
+        <div class="image">
+            <img src="poza3.jpeg" alt="Imagine d2" width="400">
+        </div>
+    </section>
+
+ 
+    <section id="interconectare_pini">
+        <h2>INTERCONECTARE PINI</h2>
+        <div class="indented">
+            <h3 class="subtitle">1. AFIȘAJUL LCD GRAFIC:</h3>
+            <ul>
+                <li>Pinul RST (Reset) al ecranului se va conecta la un pin GPIO (General Purpose Input/Output) al STM32F103C8T6, pe care îl vom folosi pentru a reseta ecranul când este necesar. Ulterior, acesta a fost conectat la PB6 (output).</li>
+                <li>Pinul RS (Register Select) este utilizat pentru a selecta între date și comenzi. Acesta ar trebui conectat la un pin GPIO al microcontroller-ului.Ulterior, acesta a fost conectat la PB4(output) .</li>
+                <li>Pinul CS (Chip Select) este utilizat pentru a selecta ecranul ca dispozitiv activ în timpul comunicării SPI. Acesta trebuie conectat și el la un pin GPIO al microcontrollerului.Ulterior, acesta a fost conectat la PB5 (output).</li>
+                <li>Pinul 3V3 se va conecta la pinul de alimentare 3v3 al microcontroller-ului.</li>
+                <li>Pinul SDA este linia de date pentru comunicația SPI. Acesta trebuie conectat la linia de date MOSI (Master Out Slave In) a microcontroller-ului. (PA7 - Port A, Pinul 7)</li>
+                <li>Pinul SCL asigură sincronizarea comunicației seriale de transmitere și recepție de date. A fost setat la pinul PA5_SCK1.</li>
+                <li>Pinul GND trebuie conectat la pinul de masă (GND) al microcontroller-ului.</li>
+                <li>Pinul LED are rolul de a controla luminozitatea LED-urilor backlight ale ecranului. (posibilă implementare: potențiometru pentru reglarea luminozității) - se va conecta la alimentare 3.3V .</li>
+            </ul>
+        </div>
+        <div class="indented">
+            <h3 class="subtitle">2. BUTOANELE:</h3>
+            <ul>
+                <li>Cele 4 butoane le vom conecta la pini GPIO diferiți setați ca pini de citire (PB12,PB13,PB14,PB15). Butoanele prezintă 4 terminale, iar odată apăsat butonul, se va realiza legatura internă pe diagonală dintre pini. (celelalte 2 terminale folosind pentru ulterioare verificări hardware).</li>
+            </ul>
+        </div>
+        <div class="indented">
+            <p class="observation">OBSERVAȚIE: Chiar dacă pinii ecranului induc gândul unei conexiuni de tip I2C, de fapt ecranul folosește un protocol SPI. SDA (serial data) este de fapt analogul pinului MOSI (master out slave in) și, deoarece ecranul doar recepționează datele, nu este nevoie de un pin MISO, existând un pin special pentru separarea comenzilor primite (dintre cele de setare a ecranului și de afișare).</p>
+        </div>
+        <div class="image">
+            <img src="d4.jpeg" alt="Placa și componentele adiționale achiziționate" width="600">
+            <p class ="observation">Placa și componentele adiționale achiziționate</p> 
+        </div>
+
+            <div class="indented">
+                <p>
+                    Pentru programarea folosind bootloader-ul și comunicația cu placa, am achiziționat un convertor USB-TTL pe care l-am conectat astfel: pinul 1 al J7 de pe placă la pinul "5V" al adaptorului.
+                </p>
+            </div>
+        <div class="image">
+            <img src="d3.jpeg" alt="Imagine d3" width="300">
+        </div>
+        
+        
+    </section>
+    <section id="schema_electrica">
+        <h2>SCHEMA ELECTRICĂ</h2>
+        <div class="indented">
+            <ul>
+                Schema electrică prezintă toate componentele existente pe placă, atât cele oferite în cadrul facultății, cât și cele specifice 
+               temei alese: 
+               <li>microcontroller STM32;</li>
+               <li>led de alimentare și led RGB;</li>
+               <li>butoane pentru user, reset și boot;</li>
+               <li>oscilator cu cuarț pentru furnizarea unui semnal de ceas, necesar sincronizării operațiilor interne ale microcontroller-ului;</li>
+               <li>stabilizator de tensiune care convertește tensiunea de alimentare de 5V la 3.3V;</li>
+               <li>port microUSB tip B;</li>
+               <li>jumper pentru conectarea USB-TTL;</li>
+               <li>4 butoane folosite la direcții, la care au fost adăugate rezistențe de pull-down pentru a evita lăsarea "în aer" a pinului de intrare,
+                când butonul nu este apăsat;</li>
+               <li>afișajul LCD grafic.</li>
+            </ul>
+        </div>
+        <div class="image">
+            <img src="d8.png" alt="Schema electrică" width="1024">
+        </div>
+    </section>
+
+    <section id="BOM">
+        <h2>Bill of Materials (BOM)</h2>
+        <table style="margin: auto; border-collapse: collapse; width: 80%;"></table>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th style="padding: 10px;">CANTITATE</th>
+                <th style="padding: 10px;">REFERINȚĂ</th>
+                <th style="padding: 10px;">VALOARE</th>
+                <th style="padding: 10px;">CAPSULĂ</th>
+                <th style="padding: 10px;">OBSERVAȚII</th>
+                <th style="padding: 10px;">FURNIZOR</th>
+                <th style="padding: 10px;">PREȚ UNITAR (lei)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>4</td>
+                    <td>R1,R2,R3,R11</td>
+                    <td>330 Ω</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>R8,R9</td>
+                    <td>20 Ω</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>R4,R12</td>
+                    <td>100kΩ</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>R6</td>
+                    <td>1MΩ</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>R7</td>
+                    <td>1.5kΩ</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>R10</td>
+                    <td>10Ω</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>R5</td>
+                    <td>10kΩ</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>C3,C4,C5,C6,C15</td>
+                    <td>100nF/50V</td>
+                    <td>smd1206</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>C8,C9</td>
+                    <td>20pF/50V</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>C2,C12</td>
+                    <td>10uF</td>
+                    <td>smd3528</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>D4</td>
+                    <td>LED VERDE</td>
+                    <td>smd0805</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>D1</td>
+                    <td>LED RGB</td>
+                    <td>smd5050-6</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>SW1,SW2,SW3</td>
+                    <td>buton</td>
+                    <td>tht SW_push_6mm_H7.3mm</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>J8</td>
+                    <td>CON6</td>
+                    <td>tht 02x03</td>
+                    <td>jumper 6 pini</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>U1</td>
+                    <td>STM32F103CBTx</td>
+                    <td>LQFP-48_7x7mm_P0.5mm</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Y1</td>
+                    <td>Oscilator cu cuarț</td>
+                    <td>crystal-HC18-U vertical</td>
+                    <td>-</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>U2</td>
+                    <td>3.3V</td>
+                    <td>SOT223</td>
+                    <td>stabilizator de tensiune</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>J7</td>
+                    <td>CON6</td>
+                    <td>tht 01x06</td>
+                    <td>jumper 6 pini</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>J2</td>
+                    <td>usb micro (tip B)</td>
+                    <td>smd0.65mm x 1.15mm</td>
+                    <td>port usb micro</td>
+                    <td>UPB</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>SW4,SW5,SW6,SW7</td>
+                    <td>buton</td>
+                    <td>tht SW_push_6mm_H7.3mm</td>
+                    <td>-</td>
+                    <td><a href="https://www.optimusdigital.ro/en/buttons-and-switches/1119-6x6x6-push-button.html">Optimus Digital</a></td>
+                    <td>0.36</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>J10</td>
+                    <td>afișaj LCD grafic TFT</td>
+                    <td>tht 1.44’’</td>
+                    <td>graphic 128xRGBx128</td>
+                    <td><a href="https://www.optimusdigital.ro/en/lcds/2167-144-lcd-for-stc-stm32-and-arduino-boards.html?search_query=lcd+stm32&results=18">Optimus Digital</a></td>
+                    <td>42.99</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    
+</body>
+</html>

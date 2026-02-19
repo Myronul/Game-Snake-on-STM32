@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezultate și concluzii</title>
+    <style>
+        h1 {
+            text-align: center;
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .indented {
+            margin-left: 20px;
+        }
+
+        img {
+            display: inline-block;
+            margin: 20px;
+            max-width: 100%;
+        }
+        .subtitle {
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        a {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>REZULTATE ȘI CONCLUZII</h1>
+
+    <h2>- IDEE INIȚIALĂ -</h2>
+    <div class="indented">
+        <p>În momentul inițial, am dorit crearea unui joc SNAKE clasic: un șarpe se deplasează pe ecran, încercând să devină cât mai mare prin preluarea hranei, totul controlat de utilizator prin intermediul butoanelor.
+            Jocul avea să se încheie prin coliziunea cu pereții sau cu el însuși și ar fi avut un singur mod de joc, cel prestabilit.
+        </p>
+    </div>
+
+    <h2>- REZULTAT FINAL -</h2>
+    <div class="indented">
+        <p>Rezultatul final prezintă un joc mult mai complex decât s-a propus inițial, deoarece am dorit să îl facem cât mai interactiv și atractiv pentru utilizatori.
+            Am creat o interfață inițială interactivă prin care utilizatorul își poate alege nivelul de dificultate (reprezentat de viteza de deplasare a șarpelui).
+        </p>
+        <img src="poza4.jpeg" alt="Butoane" width="300">
+        <img src="poza5.jpeg" alt="Butoane" width="300">
+    </div>
+    <div class="indented">
+        <p> Ulterior, am modificat strategia de câștig prin posibilitatea de trecere a șarpelui prin marginile ecranului și afișându-se din partea opusă a acestuia.
+        </p>
+        <img src="poza6.jpeg" alt="Butoane" width="300">
+        <img src="poza7.jpeg" alt="Butoane" width="300">
+    </div>
+    <div class="indented">
+        <p> Am dorit să dezvoltăm și partea estetică a jocului, astfel că am creat elemente cât mai colorate și dinamice; am creat și o interfață de sfârșit de joc (animație dinamică) prin care utilizatorul este anunțat 
+            de scorul obținut.
+        </p>
+        <img src="poza8.jpeg" alt="Butoane" width="300">
+    </div>
+
+    <h2>PROBLEME ÎNTÂMPINATE PE PARCURSUL IMPLEMENTĂRII</h2>
+    <div class="indented">
+        <p>Pe parcursul dezvoltării software și hardware, am întâmpinat diverse probleme precum:
+            <ul>
+                <li>Ne-funcționarea ecranului în mediul de lucru VSCode.</li>
+                <li>Găsirea unei metode eficiente pentru lipirea conexiunilor fizice, evitând scurtcircuitările.</li>
+                <li>Implementarea unei metode eficiente pentru adăugarea segmentelor noi ale șarpelui după consumarea hranei.</li>
+                <li>Generarea poziției hranei (RNG) și evitarea coliziunii cu corpul șarpelui.</li>
+                <li>Rezolvarea unei probleme de overflow pentru o variabilă unsigned pe 8 biți, care se decrementa sub valoarea minimă permisă (0).</li>
+                <li>În loop-ul pentru verificarea corectitudinii poziției hranei, am omis să compar și cu poziția capului șarpelui (am folosit `<0` în loc de `<=0`).</li>
+            </ul>
+        </p>
+    </div>
+    
+    <h2>OPTIMIZĂRI ADUSE PE PARCURSUL IMPLEMENTĂRII</h2>
+    <div class="indented">
+        <p>În ceea ce privește optimizarea, am adăugat întreruperi externe pentru inputuri, asigurându-ne că pull-down-ul este respectat și că întreruperile sunt verificate pe rising edge.
+            De asemenea, am stilizat jocul prin adăugarea de ochi pentru șarpe, făcându-l mai atractiv. Am folosit culori vii în designul jocului pentru a îmbunătăți experiența vizuală a utilizatorilor.
+            In plus sarpele poate sa si treaca prin pereti, sporind nivelul de complexitate al jocului si dezvoltarii software.
+        </p>
+    </div>
+
+</body>
+</html>

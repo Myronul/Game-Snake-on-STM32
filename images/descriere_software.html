@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descriere Software</title>
+    <style>
+        h1 {
+            text-align: center;
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        section {
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        
+        .observation {
+            color: blue;
+        }
+        
+        .image {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .image img {
+            margin: 0 10px; /* Adjust margin to ensure equal spacing */
+        }
+        
+        .caption {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+       
+        .indented {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>DESCRIERE SOFTWARE</h1>
+
+    <section id="etapele">
+        <h2>Etapele dezvoltării software sunt următoarele:</h2>
+        <ul>
+            <li>1) Setările software/firmware ale microprocesorului STM32F103CBT6</li>
+            <li>2) Librării folosite</li>
+            <li>3) Logica de proiectare a jocului Snake, funcții folosite</li>
+            <li>4) Consumul de memorie/resurse ale microcontrolerului</li>
+        </ul>
+    </section>
+
+    <section id="setari_software">
+        <h2>1) Setările software/firmware ale microprocesorului STM32</h2>
+        <div class="indented">
+            <div class="image">
+                <img src="d9.jpeg" alt="Setările microprocesorului STM32" width="400">
+                <img src="d13.jpeg" alt="Setarile noi-UPDATE" width="400">
+            </div>
+            <div class="caption">Configuratie veche(Stanga)</div>
+            <div class="caption">Configuratie noua(Dreapta)</div>
+            <p>
+                După cum se poate vedea și în imaginea de mai sus, în cadrul proiectului, pe lângă setările softului de test, am adăugat în plus
+                pini pentru comunicația cu ecranul (de tipul SPI) și 4 pini de input.
+                Pinul A5 reprezintă pinul ce realizează legătura de ceas dintre dispozitive (Serial Clock), pinul A7 (Serial Data) realizează 
+                legătura de date dintre dispozitive, iar pinii PB6, PB5 și PB4 sunt pinii pentru reset, chip select și register select.
+                Ecranul folosește o comunicație Half Duplex Master, în sensul în care doar masterul trimite date către dispozitivul periferic,
+                și nu viceversa. Pinul clasic MISO nu există, vom folosi doar pinul MOSI (anume pinul SDA - Serial Data).
+            </p>
+            <p>
+                Pinii PB12, PB13, PB14 și PB15 sunt pini de INPUT la care vom conecta butoanele direcționale pentru a mișca caracterul (șarpele) pe ecran.
+                Acestea vor fi implementate folosind o rezistență de PullDown, astfel, odată ce apăsăm pe buton, se va trimite un semnal de HIGH către pin.
+            </p>
+            <p>
+                Vom folosi de asemenea pentru obținerea unei performante mult mai bune (Program Counter rapid), ceasul exterior cu cuarț din cadrul plăcuței,
+                avand o valoare de 72 MHz. Pentru utilizarea timerului vom seta un prescaler de 7199, astfel obținând o frecvență de 10 kHz. Counter 
+                period-ul va avea
+                rolul de a număra semnalele de ceas, setându-l la o valoare de 100, vom obține 10 kHz/100, adică 100. Acest număr indică faptul că
+                în fiecare secundă întreruperea în sistem va avea loc de 100 de ori (astfel funcția de întrerupere din cadrul softului se va apela
+                de 100 de ori pe secundă, putand astfel tine cont de trecerea unui anumit interval de timp, lucru util in cadrul proiectarii jocului).
+            </p>
+            <p>
+                De asemenea, pinii deja configurați sunt RCC_OSC_IN/RCC_OSC_OUT PD0 care sincronizează operațiile din microprocesor cu un semnal de ceas extern,
+                TIM2_CH1 pentru timerul setat de noi, PA10 și PA9 pentru comunicația UART, PA11 și PA12 pentru comunicația USB, cât și diferiți pini pentru un LED RGB și 
+                butoanele de RESET și USER.
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="observation">*modificare ulterioară</h2>
+        <div class="indented">
+            <p>În urma dezvoltării software a jocului acesta a ajuns să dețină o complexitate destul de ridicată,
+            astfel în urma testării acestuia am observat că există un Delay destul de mare în ceea ce privește
+            citirea inputului (există o întârziere nedatorată Debouncingului ci a complexității codului). Prin urmare ne-am gândit ca inputul
+            să nu fie tratat standard, fiind practic verificată o condiție într-o anumită zonă de cod, ci ca
+            o întrerupere în sistem. Butoanele acum nu sunt setate ca inputuri normale ci ca întreruperi de sistem
+            exterioare. Odată ce apăsăm pe un buton de schimbare a direcției(eveniment), se va activa în sistem o întrerupere
+            anume o funcție specială va fi apelată, funcție în care vom schimba direcția de deplasare a șarpelui.</p>
+        </div>
+    </section>
+
+    <section id="librarii_folosite">
+        <h2>2) Librării folosite</h2>
+        <div class="image">
+            <img src="d14.jpeg" alt="Librarie utilizata 1" width="200">
+            <img src="d15.jpeg" alt="Librarie utilizata 2" width="300">
+        </div>
+        <div class="indented">
+            <p>
+                În cadrul dezvoltării software, am folosit librării specifice driverului ecranului st7735, alături de librăria principală grafică Adafruit_GFX.
+                Am adaugat 3 fisiere sursa (.c) si 3 fisiere header (.h), st7735,GFX_FUNCITONS si fonts in care sunt descrise si setate driverele de functionare dintre ecran si microcontroler.
+                Regasim in aceasta librarie diferite functii specifice precum de a colora pixeli la anumite coordonate carteziene, de a colora intreg ecranul
+                sau de a afisa un string (sir de caractere) pe ecran. De asemenea in headerul principal ST7735.h am setat pinii de configurare hardware (RST,
+                CS,RS), tipul ecranului folosit (rezolutia) cat si orientarea.
+            </p>
+        </div>
+    </section>
+
+    <section id="logica_proiectare">
+        <h2>3) Logica de proiectare a jocului Snake, funcții folosite</h2>
+        <div class="indented">
+            <div class="image">
+                <img src="d10.jpeg" alt="Proiectarea jocului Snake" width="400">
+            </div>
+            <p>
+                Pentru a proiecta clasicul joc Snake, va trebui să urmărim configurația spațială/matematică a ecranului LCD. 
+                Ecranul folosit are rezoluția de 128x128, practic avem pe lungime cât și pe lățime 128 de pixeli. Axa de coordonate (0,0) este colțul din stânga sus a ecranului.
+                X și Y crescând astfel de sus în jos și de la stânga la dreapta.
+            </p>
+            <p>
+                Pentru a crea șarpele pe ecran, am hotărât printr-un calcul simplu să împartim ecranul. Dacă avem 128 de pixeli, am împărțit ecranul la 8 (lungimea și lățimea), astfel putem ocupa
+                pe ambele direcții (x,y) un număr de 128/8 - 16 spații. Un număr de 16 spații este suficient pentru implementarea jocului, în funcție de preferințe putem alege și
+                un număr de 128/4 - 32 de spații, dar am considerat că 16 ar fi ideale, mai ales că ecranul folosit este unul destul de mic.
+                Prin urmare, hrana cât și șarpele vor fi reprezentate printr-un pătrat de pixeli de 8x8, rezolvând problema spațierii în ecran.
+            </p>
+            <p>
+                În mod suplimentar, putem alege dacă să micșorăm ecranul de joc pentru a vedea scorul în timp real într-un rând de jos lăsat liber de 8 pixeli înălțime,
+                însă având ecranul mic am preferat să afișăm scorul odată ce jocul s-a terminat, lăsând jucătorului mai mult spațiu.
+            </p>
+            <div class="image">
+                <img src="d11.jpeg" alt="Logica jocului Snake" width="400">
+            </div>
+            <p>
+                Va trebui să urmărim etape cruciale în dezvoltare software a jocului precum:
+            </p>
+            <ul>
+                <li>Construirea șarpelui ca un vector de structuri, unde vom defini o structură de tip typedef struct Sarpe care să conțină 2 variabile de tip uint8_t, x și y care reprezintă 
+                poziția principală a elementului șarpelui. Având în vedere că lungimea maximă este de 128, folosim tipul de date uint8_t deoarece aceasta ocupă doar 8 biți în memorie (1 octet),
+                pe când un int ar ocupa 4 octeți în memorie (de 4 ori mai mult).</li>
+                <li>Funcția generatoare a pixelilor/asignarea coordonatelor: Deoarece am împărțit ecranul în 16x16 pătrățele, vom alege un pixel generator pornind de la o coordonată x,y ale căror
+                valori să fie multipli de 8. Practic alegem un pivot de la care să plecăm pentru a ne afișa în pixeli capul/corpul șarpelui. Astfel, de exemplu, pentru a completa pe prima linie folosind
+                un asemenea algoritm, pornim de la coordonata (0,0) care este multiplu de 8, colorăm în dreapta și în jos 8x8 pixeli formând un pătrat, ca apoi să ne deplasăm pe x cu 8 pentru a colora
+                iarăși următorul pătrățel de pixeli, adică ne vom afla la coordonata (0,8) ca apoi să ne aflăm la (0,16) până la (0,120). Practic pivotul generator și de referință pentru fiecare corp 
+                de șarpe sau hrană reprezintă pixelul de la coordonata stânga sus a corpului respectiv (din această cauză e și numit pivot/generator).</li>
+                <li>Spawnarea inițială a șarpelui (implementarea unor funcții de random), care să se afle între 0 și 120 (Multiplu de 8, pentru a respecta configurația spațială și evitarea coliziunilor).</li>
+                <li>Spawnarea mâncării (de asemenea funcție random) care să verifice mai întâi dacă poziția de spawn este sau nu ocupată de corpul șarpelui, de asemenea și aceasta cu pivot
+                de inițializare ales random între 0 și 120.</li>
+            </ul>
+            <p>Logica deplasării șarpelui:</p>
+            <ul>
+                <li>Funcția update_sarpe() care parcurge fiecare vector de structuri al șarpelui și să coloreze de aceeași culoare ca cea a fundalului șarpele (Utilizatorul nu va percepe această schimbare de
+                oarece rata de refresh a ecranului este prea mare, același principiu ca la PWM). Odată ce pixeli au fost șterși din sfera vizuală, asta nu înseamnă că și coordonatele x și y. Acestea
+                vor fi recalculate în funcție de inputul direcțional al utilizatorului. Principiul din spate este același ca la permutările matematice, dacă avem 1 2 3 4 unde 1 este capul șarpelui, și permutăm
+                spre stânga (utilizatorul se deplasează spre stânga) vom obține 1 _ 2 3 4, 1 2 _ 3 4, 1 2 3 _ 4, 1 2 3 _, practic dacă ne uităm ultima iterație a permutării putem face analogia cu coordonatele
+                spațiale, anume poziția celui din dreapta va prelua poziția celui din stânga sa, prin urmare o simplă permutare într-un for poate rezolva problema deplasării, ca la final să deplasăm
+                separat capul șarpelui deoarece permutarea se va opri la acesta. În funcție de direcția de deplasare, ne vom deplasa cu +8/-8 pe x/y după logica prezentată anterior. Odată ce coordonatele
+                au fost actualizate, putem folosi o funcție desenează_sarpe(), care să preia fiecare șarpe din vector și să-l deseneze pornind de la coordonatele pivot ale fiecăruia.</li>
+                <li>O observație importantă este aceea că scorul va juca un rol important pentru a stabili lungimea șarpelui, acesta va porni de la 0 care reprezintă existența unui singur element în șarpe,
+                adică propriul său cap sarpe[0], iar cu actualizarea scorului acesta să crească cu +1 și să se adauge deci în vectorul sarpe[], noile elemente.
+                La fiecare iterație a unei funcții principale logica_joc() (în care se va regăsi toată fizica/dinamica jocului), de exemplu, apelată în funcția de întrerupere, se va adăuga un delay 
+                de 250/500/750 pentru a spori sau micșora viteza de deplasare a șarpelui pe ecran.</li>
+                <li>De asemenea, dacă ne deplasăm spre dreapta și inputul de schimbare a sensului este spre stânga (sau dacă ne deplasăm spre sus și inputul este în jos și viceversa), se va păstra 
+                starea de deplasare curentă, fără ca inputul să aibă vreun efect.</li>
+            </ul>
+            <p>Logica actualizării scorului/creșterea în lungime:</p>
+            <ul>
+                <li>De fiecare dată când coordonatele capului șarpelui corespund cu cele ale mâncării (pivotii x,y ale pătrățelelor desenate corespund), atunci se va mări scorul și se va adăuga elementul 
+                sarpe[scor].x și sarpe[scor].y, urmând ca hrana să fie spawnată în altă zonă a ecranului, diferită de cea a corpului șarpelui printr-o funcție simplă.</li>
+                <li>Game over: La fiecare iterație, dacă pivotii x sau y depășesc coordonatele de frontieră 128 sau sub 0, atunci logica jocului se va opri și se va afișa pe ecran scrisul "Game Over"
+                alături de scorul obținut, acest lucru se va implementa printr-o funcție de checkcoliziune() la fiecare deplasare a șarpelui pe ecran.</li>
+            </ul>
+            <p>Un aspect important este reprezentat de butoane, care din punct de vedere software vor fi implementate ținându-se cont de fenomenul de debouncing, pentru a oferi jucătorului
+            o dinamică rapidă a răspunsului la input.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="observation">*modificare ulterioară</h2>
+        <div class="indented">
+            <p>In urma dezvoltarii jocului am adaugat urmatoarele modificari:
+                <li>Structura definitorie a sarpelui, care are ca date interne coordonatele pivotului generator, din tipul de date uint8_t ale acestora am schimbat coorodnatele in tipul de data
+                int16_t. Aceasta schimbarea se datoreaza faptului ca uint8_t este unsigned deci daca i se atribuie unei variabile de acest tip de data o valoarea sub 0 vom obtine
+                buffer overflow ceea ce ducea in fizica jocului la erori "neasteptate". O alternativa facila era cea de a schimba din unsigned in signed, insa baza de schimbare este
+                in complement fata de 2, variabila pe 8 biti ar fi luat valori intre 127 si -127, iar aceste variabile care desemneaza coordonatele pixelilor pot lua valori pana la 128
+                ceea ce ducea iar la posibilitatea de Buffer Overfow. Prin urmare am hotarat sa folosim variabile de tip uint16_t care sunt pe 16 biti (2 octeti) pentru a nu mai intampina problema aceasta</li>
+                <li>Mai in detaliu, functia de stergere parcurge vectorul de structuri de coordonate ale sarpelui si pentru fiecare element, pornind de la pivotul generator, parcurgem sectiunea de 8x8 pixeli
+                si o coloram de aceeasi culoare ca backgroundul (negru in cazul de fata) ceea ce creeaza efectul de stergere din punct de vedere vizual.</li>
+                <li>Pentru spawnarea aleatoare a hranii, am folosit functia predefinita srand(). Aceasta functie foloseste un seed de start pentru rng, iar daca am folosit acelas seed am obtine
+                mereu aceleasi zone de spawn. Ca sa dam un efect autentic jocului, ne-am gandit sa folosim ca seed HAL_GetTick care returneaza numarul de ticks care au trecut de la pornirea sistemului.
+                Practic srand(HAL_GetTick) va prelua ca seed ticks-ul ceasului, iar daca o declaram in cadrul functiei while(1) din main la fiecare iteratie a acesteia seed-ul se va schimba
+                obtinand de fiecare data valori complet aleatorii. De asemenea este de remarcat faptul ca noi dorim sa obtinem valori intre 0 si 120 ca multiplii de opt, deci odata ce numarul a fost generat
+                va trebui sa-l prelucram astfel: (nr_random%16)*8 obtinand intotdeauna un numar multiplu de 8 de la 0 pana la 15*8.</li>
+                <li>De asemenea am adaugat o interfata initiala in care putem selecta viteza (mica/mare) cu ajutorul butoanelor de schimbare a directiei dreapta si stanga.</li>
+                <li>Scorul este de asemenea extrem de important in implementare. Sarpele incepe cu 3 elemente, pozitionat initial in mijlocul ecranului, lungimea sarpelui fiind descrisa de catre scor.
+                Practic sarpe[scor] reprezinta lungimea curenta a sarpelui (incluzand ca element si 0). La afisarea interfetei de game over vom scade cu 2 scorul obtinut (sarpele incepe cu 0 1 si 2 deci scadem 2 pentru a obtine scorul real).
+                Variabila scor va fi initializata prin urmare cu 2.</li>
+                <li>Modul prin care adaugam elemente la coada sarpelui este de asemenea importanta. Pentru a adauga eficient elementul nou la coada acestuia, dupa ce verificam daca pivotii capului cu cei a hranei corespund,
+                crestem scorul (scor++) iar apoi facem diferenta dintre ultimele 2 elemente de la coada. AStfel putem decide inspre ce directie si dupa care coordonate sa adaugam noul element.
+                Ca un exemplu, daca ultimele doua elemente de la coada (coorodnatele pixelilor de referinta) au aceeasi valoarea pe axa y iar ultimul element pe y este cu 8 mai mic decat al doilea,
+                inseamna ca va trebui sa adaugam noul element (pixel pivot) inspre stanga pe axa y (pe aceeasi linie) cu -8 pe axa x fata de coordonata ultimului element.</li>
+                <li>De asemenea pentru a spori complexitatea jocului am facut posibila trecerea prin pereti. Conceptul este destul de simplu, se va verifica in cadrul functiilor de deplasare daca coorodnatele sarpelui pe axele x si y
+                nu au ajuns la o anumita limita (in cazul de fata < decat 0 sau > decat 120), caz in care noua coordonata a capului va fi la limita opusa ecranului.</li>
+                <li>Butoanele au fost modiificate si se vor implementa ca intreruperi, de asemenea fenomenul de debouncing este eliminat printr-un mic delay in functia de intrerupere exterioara
+                a butoanelor care nu mai permite schimbarea directiei cel putin timp de 15ms.
+            </p>
+        </div>
+    </section>
+
+    <section id="organigrama">
+        <h2>*Organigrama implementării jocului</h2>
+        <div class="image">
+            <img src="d12.jpeg" alt="Organigramă" width="500">
+        </div>
+    </section>
+
+    <section id="consum_memorie">
+        <h2>4) Consumul de memorie/resurse ale microcontrolerului</h2>
+        <div class="indented">
+            <div class="image" style="margin-left: -50px;">
+                <img src="d16.jpeg" alt="Consum resurse" width="400">
+            </div>
+            <p>
+                Microcontrolerul STM32F103CBT6 are următoarele specificații:
+            </p>
+            <ul>
+                <li>128 KB memorie Flash</li>
+                <li>20 KB memorie RAM</li>
+                <li>72 MHz frecvența de operare</li>
+                <li>14 canale de conversie ADC</li>
+                <li>DMA Controller (Direct Memory Access)</li>
+                <li>Interfață USB 2.0</li>
+                <li>Dupa cum se poate observa din imaginea de mai sus, programul flash-uit ocupa o dimensiunea de 0x08007774-0x08000000=0x00007774 care in zecimal reprezinta 
+                30580 Bytes anume aproximativ 3050/1024 = 29,86 KBytes. Memroia flash total disponibila este de 128 KB deci nu avem nicio problema in ceea ce inseamna consumul de memorie.</li>
+                <li>Au fost folosite resurse precum timere, comunicarea SPI, intreruperi exterioare si comunicarea UART.
+                
+
+            </ul>
+        </div>
+    </section>
+</body>
+</html>

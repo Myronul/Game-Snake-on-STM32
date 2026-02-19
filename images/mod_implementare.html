@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descriere Joc Snake</title>
+    <style>
+        h1 {
+            text-align: center;
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .indented {
+            margin-left: 20px;
+        }
+
+        img {
+            display: inline-block;
+            margin: 20px;
+            max-width: 100%;
+        }
+        .subtitle {
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        a {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>MOD DE IMPLEMENTARE</h1>
+    <div class="indented">
+        <p>Jocul Snake este un joc clasic în care un șarpe se mișcă pe un ecran, consumând mâncare pentru a crește în lungime. 
+            Scopul jocului este de a evita coliziunea cu pereții și cu propriul său corp, pentru a obține un scor cât mai mare în final.
+        </p>
+    </div>
+    
+
+    <h2>FUNCȚIILE LOGICE PRINCIPALE</h2>
+    <ul>
+        <li>posibilitatea de alegere între două nivele de dificultate;</li>
+        <li>mișcarea șarpelui în diferite direcții, cu un pas de o celulă;</li>
+        <li>detectare coliziune a șarpelui cu marginile ecranului sau cu el însuși;</li>
+        <li>apariție aleatoare a mâncării pe ecran, cu excepția pozițiilor deja ocupate (de șarpe sau de altă mâncare generată anterior);</li>
+        <li>creșterea în lungime a corpului șarpelui, odată ce capul său ajunge pe aceeași poziție cu mâncarea;</li>
+        <li>implementare sistem de scor.</li>
+    </ul>
+
+    <h2>COMPONENTE ADIȚIONALE</h2>
+
+    <h3 class="subtitle">1. Ecran LCD cu afișaj grafic</h3>
+    <div class="indented">
+        <p>Acesta are rezoluția de 128*128 pixeli (RGB) de diagonala de 1.44", model TFT.</p>
+    </div>
+    <img src="d5.jpg" alt="Ecran LCD" width="400">
+    <img src="d6.jpg" alt="Ecran LCD" width="400">
+    <div class="indented">
+        <p>Link achiziționare: <a href="https://www.optimusdigital.ro/en/lcds/2167-144-lcd-for-stc-stm32-and-arduino-boards.html">ecranLCD</a></p>
+    </div>
+    
+
+    <h3 class="subtitle">2. Butoane</h3>
+    <div class="indented">
+        <p>4 butoane care vor reprezenta câte o direcție (sus/jos/stânga/dreapta).</p>
+    </div>
+    <img src="d7.jpg" alt="Butoane" width="400">
+    <div class="indented">
+        <p>Link achiziționare: <a href="https://www.optimusdigital.ro/en/buttons-and-switches/1119-6x6x6-push-button.html">butoane</a></p>
+    </div>
+    
+
+    <h3 class="subtitle">3. Fire de conexiune și breadboard</h3>
+    <div class="indented">
+        <p>Firele vor fi folosite pentru conexiunile dintre componente și breadboard-ul pentru testarea acestora.</p>
+        <p>Link achiziționare: <a href="https://www.optimusdigital.ro/en/breadboards/8-breadboard-hq-830-points.html">breadboard</a> și <a href="https://www.optimusdigital.ro/en/wires-with-connectors/93-separated-male-male-wires-20-cm-10-p.html">fire</a></p>
+    </div>
+    
+
+    <h2>MOD DE IMPLEMENTARE</h2>
+    <div class="indented">
+        <p>Jocul Snake implementat va funcționa prin interacțiunea între microcontroller-ului STM32 și afișaj, utilizând comunicația serială SPI pentru a transmite datele de afișare. Microcontroller-ul va actualiza continuu buffer-ul de afișare al LCD-ului, desenând elementele jocului, cum ar fi șarpele/mâncarea, pe baza stării curente a jocului și a intrărilor utilizatorului. Intrarea de la butoane va fi citită de microcontroller și interpretată ca și comenzi de mișcare pentru șarpe (fiecare buton va avea logică de control implementată care atribuie fiecăruia câte o direcție: sus/jos/stânga/dreapta).</p>
+    </div>
+    <div class="indented">
+        <p>În paralel, microcontroller-ul efectuează verificări continue pentru a detecta coliziunile dintre șarpe și marginile ecranului (compararea pozițiilor capului șarpelui cu limitele ecranului, cunoscute) sau propriul corp (compararea pozițiilor capului cu pozițiile segmentelor corpului). Pentru a eficientiza verificările, pozițiile capului și ale segmentelor corpului șarpelui vor fi stocate într-o listă/vector. Dacă o coliziune va fi detectată (pozițiile comparate vor fi egale), jocul se încheie, iar scorul final va fi afișat pe ecran.
+        </p>
+    </div>
+    <div class="indented">
+        <p><a> *modificare ulterioară: </a> Din dorința de a crea un joc cât mai interactiv, dar și complex, am renunțat la ideea terminării jocului în cazul coliziunii cu marginile ecranului. Astfel, șarpele va fi capabil să treacă prin pereți și să apară discontinuu în partea opusă a ecranului, urmând să își continue normal deplasarea; iar singura modalitate prin care jocul se va termina va fi prin coliziunea șarpelui cu el însuși.</p>
+    </div>
+    <div class="indented">
+        <p>Mâncarea va fi generată la o poziție aleatoare de pe ecran, definindu-se o zonă validă în care aceasta poate să apară (toată suprafața ecranului minus spațiul deja ocupat de corpul șarpelui sau de altă mâncare generată anterior). Se vor genera aleatoriu două coordonate (x,y) în cadrul spațiului valid definit. La fiecare actualizare a poziției șarpelui, se verifică intersecția capului cu mâncarea, iar în cazul potrivirii, lungimea sa va crește și scorul va fi actualizat.</p>
+    </div>
+    <div class="indented">
+        <p>Logica de scor e implementată pentru a urmări performanța utilizatorului pe parcursul jocului. La începutul jocului, scorul este inițializat la zero. În momentul în care șarpele consumă mâncarea, scorul jucătorului este crescut (fiecare bucată de mâncare consumată aduce un anumit număr de puncte, iar scorul va fi incrementat cu o valoare fixă). Scorul va fi afișat pe ecran, într-un colț, în timp real, iar la final va apărea central.</p>
+    </div>
+
+</body>
+</html>
